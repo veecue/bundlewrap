@@ -1,3 +1,4 @@
+from datetime import datetime
 from importlib.machinery import SourceFileLoader
 from inspect import isabstract
 from os import environ, listdir, mkdir, walk
@@ -523,7 +524,9 @@ class Repository:
             self._metastacks = {}
             self._nodes_we_need_metadata_for = {node_name}
 
+            io.stderr(f'{datetime.now()} BEGIN _build_node_metadata({node_name})')
             self._build_node_metadata()
+            io.stderr(f'{datetime.now()} END _build_node_metadata({node_name})')
 
             io.debug("completed metadata for {} nodes".format(
                 len(self._nodes_we_need_metadata_for),
@@ -636,6 +639,8 @@ class Repository:
                         if (node_name, reactor_name) in do_not_run_again:
                             continue
                         try:
+                            self.phocounter.setdefault((node.name, reactor_name), 0)
+                            self.phocounter[(node.name, reactor_name)] += 1
                             new_metadata = reactor(self._metastacks[node.name])
                         except KeyError as exc:
                             keyerrors[(node_name, reactor_name)] = exc
@@ -738,8 +743,13 @@ class Repository:
 
     def metadata_hash(self):
         repo_dict = {}
+        self.phocounter = {}
         for node in self.nodes:
             repo_dict[node.name] = node.metadata_hash()
+        # When generating repo-wide stats, make sure to comment the code
+        # in node.py.
+        #for k, v in sorted(self.phocounter.items()):
+        #    io.stderr(f'{v} {k}')
         return hash_statedict(repo_dict)
 
     def populate_from_path(self, path):
