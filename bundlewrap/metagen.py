@@ -1,3 +1,4 @@
+from datetime import datetime
 from os import environ
 from traceback import TracebackException
 
@@ -89,7 +90,9 @@ class MetadataGenerator:
             except KeyError:
                 pass
 
+            io.stderr(f'{datetime.now()} BEGIN _metadata_for_node({node_name})')
             self.__build_node_metadata(node_name)
+            io.stderr(f'{datetime.now()} END _metadata_for_node({node_name})')
 
             # now that we have completed all metadata for this
             # node and all related nodes, copy that data over
@@ -277,6 +280,10 @@ class MetadataGenerator:
     def __run_reactor(self, node_name, reactor_name, reactor):
         if (node_name, reactor_name) in self.__do_not_run_again:
             return False, set()
+
+        self.phocounter.setdefault((node_name, reactor_name), 0)
+        self.phocounter[(node_name, reactor_name)] += 1
+
         self.__partial_metadata_accessed_for = set()
         self.__reactors_run += 1
         try:

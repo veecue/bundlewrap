@@ -703,7 +703,10 @@ class Node:
                 raise
 
     def metadata_hash(self):
-        return hash_metadata(self.metadata)
+        a = hash_metadata(self.metadata)
+        for k, v in sorted(self.repo.phocounter.items()):
+            io.stderr(f'{v} {k}')
+        return a
 
     @property
     def metadata_defaults(self):

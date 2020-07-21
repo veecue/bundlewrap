@@ -200,6 +200,8 @@ class Repository(MetadataGenerator):
         else:
             self.item_classes = list(self.items_from_dir(items.__path__[0]))
 
+        self.phocounter = {}
+
     def __eq__(self, other):
         if self.path == "/dev/null":
             # in-memory repos are never equal
@@ -463,6 +465,10 @@ class Repository(MetadataGenerator):
         repo_dict = {}
         for node in self.nodes:
             repo_dict[node.name] = node.metadata_hash()
+        # When generating repo-wide stats, make sure to comment the code
+        # in node.py.
+        #for k, v in sorted(self.phocounter.items()):
+        #    io.stderr(f'{v} {k}')
         return hash_statedict(repo_dict)
 
     def populate_from_path(self, path):
